@@ -35,3 +35,9 @@ The content of `output.pcap` can be seen per packet using [Wireshark](https://ww
 
 Please read [this file](LICENSE).
 
+## Work With Wireshark
+
+```
+./Blesniffer -d 0 ~/Downloads/output.pcap
+tail -f -c +0 ~/Downloads/output.pcap |wireshark -k -i -
+```

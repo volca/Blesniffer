@@ -8,7 +8,6 @@
 
 #import "CC2540Record.h"
 
-
 // MARK: -
 
 @interface CC2540Record ()
@@ -93,6 +92,11 @@ const size_t MinimumLength = HeaderLength + FooterLength;
 	return YES;
 }
 
+static inline char itoh(int i) {
+    if (i > 9) return 'A' + (i - 10);
+    return '0' + i;
+}
+
 - (void)parseBytes:(uint8 *)bytes length:(NSInteger)length {
 	struct CC2540CapturedRecordHeader *header = (struct CC2540CapturedRecordHeader *)bytes;
 	
@@ -105,8 +109,21 @@ const size_t MinimumLength = HeaderLength + FooterLength;
 	packetTimestamp.tv_usec = (header->timestamp % nanoSeconds) / nanoToMicro;
 	
 	uint32 packetLength = (uint32)((size_t)length - MinimumLength);
+    /*
 	void *packetBytes = malloc(packetLength);
 	memcpy(packetBytes, header->packet, packetLength);
+    */
+    
+    uint32 i;
+    unsigned char *b;
+    unsigned char *packetChars = malloc(packetLength * 2) + 1;
+    b = header->packet;
+    for (i = 0; i < packetLength; i++) {
+        packetChars[i * 2] = itoh((b[i] >> 4) & 0xF);
+        packetChars[i*2+1] = itoh(b[i] & 0xF);
+    }
+    packetLength *= 2;
+    packetChars[packetLength] = '\0';
 
 	struct CC2540CapturedRecordFooter *footer = (struct CC2540CapturedRecordFooter *)(bytes + length - FooterLength);
 	int packetRssi = (char)footer->rssi;
@@ -115,12 +132,13 @@ const size_t MinimumLength = HeaderLength + FooterLength;
 	
 	int packetPduType = 0;
 	if (packetLength > 5) {
-		packetPduType = ((uint8 *)packetBytes)[5] >> 4;
+		packetPduType = ((uint8 *)header->packet)[5] >> 4;
 	}
 	
 	self.packetTimestamp = packetTimestamp;
 	self.packetLength = packetLength;
-	self.packetBytes = packetBytes;
+    //self.packetBytes = packetBytes;
+    self.packetChars = packetChars;
 	self.packetRssi = packetRssi;
 	self.packetChannel = packetChannel;
 	self.packetStatus = packetStatus;

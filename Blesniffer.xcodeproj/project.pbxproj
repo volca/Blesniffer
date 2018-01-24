@@ -148,7 +148,7 @@
 				TargetAttributes = {
 					31C344F91DCB177D00C53E33 = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = U853Z6LKZW;
+						DevelopmentTeam = B394B8PA37;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -279,7 +279,7 @@
 		31C345021DCB177D00C53E33 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEVELOPMENT_TEAM = U853Z6LKZW;
+				DEVELOPMENT_TEAM = B394B8PA37;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -287,7 +287,7 @@
 		31C345031DCB177D00C53E33 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEVELOPMENT_TEAM = U853Z6LKZW;
+				DEVELOPMENT_TEAM = B394B8PA37;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

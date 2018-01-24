@@ -132,6 +132,7 @@ int main(int argc, const char *argv[]) {
 		signal(SIGINT, signalHandler);
 		NSUInteger number = 0;
 		while (ReadingRecord) {
+            [cc2540 start: channelNumber];
 			@autoreleasepool {
 				CC2540Record *record = [cc2540 read];
 				if (!record) {
@@ -146,7 +147,9 @@ int main(int argc, const char *argv[]) {
 					CC2540CapturedRecord *capturedRecord = (CC2540CapturedRecord *)record;
 					verbose("%c", (capturedRecord.packetPduType > 0) ?
 						((char)(capturedRecord.packetPduType) + '0') : '?');
-					[file write:capturedRecord];
+					//[file write:capturedRecord];
+                    fprintf(stdout, capturedRecord.packetChars);
+                    fprintf(stdout, "\n");
 				}
 			}
 			number++;
