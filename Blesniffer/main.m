@@ -35,18 +35,38 @@ static void signalHandler(int signal) {
 	ReadingRecord = NO;
 }
 
+static int parseMac(char *str, uint8_t *output) {
+    int i;
+    size_t len = strlen(str);
+    char buf[3] = {'\0','\0','\0'};
+
+    if (12 != len) {
+        return -1;
+    }
+    
+    for (i = 0; i < len / 2; i++) {
+        buf[0] = str[i * 2];
+        buf[1] = str[i * 2 + 1];
+        output[i] = strtol(buf, NULL, 16);
+    }
+    
+    return 0;
+}
+
 int main(int argc, const char *argv[]) {
 	@autoreleasepool {
 		const char *argv0 = argv[0];
 
 		int channelNumber = 0;
 		int deviceNumber = 0;
+        uint8_t macFilter[6];
+        
 		{
-			int optch;
+			int optch, ret;
 			extern char *optarg;
 			extern int optind;
 			extern int opterr;
-			while ((optch = getopt(argc, (char **)argv, "c:d:v")) != -1) {
+            while ((optch = getopt(argc, (char **)argv, "c:d:m:v")) != -1) {
 				switch (optch) {
 					case 'c':
 						channelNumber = atoi(optarg);
@@ -61,6 +81,24 @@ int main(int argc, const char *argv[]) {
 					case 'v':
 						VerboseMode = YES;
 						break;
+                    case 'm':
+                        ret = parseMac(optarg, macFilter);
+                        if (-1 == ret) {
+                            fprintf(stderr, "%s: Wrong mac address.\n", optarg);
+                            exit(1);
+                        }
+                        
+                        fprintf(
+                            stdout,
+                            "Mac Filter: %02X %02X %02X %02X %02X %02X.\n",
+                            macFilter[0],
+                            macFilter[1],
+                            macFilter[2],
+                            macFilter[3],
+                            macFilter[4],
+                            macFilter[5]
+                        );
+                        break;
 					default:
 						exit(1);
 						break;
@@ -131,8 +169,8 @@ int main(int argc, const char *argv[]) {
 		verbose("start to capture.\n");
 		signal(SIGINT, signalHandler);
 		NSUInteger number = 0;
-		while (ReadingRecord) {
-            [cc2540 start: channelNumber];
+        
+        while (ReadingRecord) {
 			@autoreleasepool {
 				CC2540Record *record = [cc2540 read];
 				if (!record) {
@@ -145,12 +183,17 @@ int main(int argc, const char *argv[]) {
 				}
 				if ([record isKindOfClass:[CC2540CapturedRecord class]]) {
 					CC2540CapturedRecord *capturedRecord = (CC2540CapturedRecord *)record;
+                    /*
 					verbose("%c", (capturedRecord.packetPduType > 0) ?
 						((char)(capturedRecord.packetPduType) + '0') : '?');
+                     */
 					//[file write:capturedRecord];
                     fprintf(stdout, capturedRecord.packetChars);
                     fprintf(stdout, "\n");
 				}
+                
+                [cc2540 start:channelNumber];
+
 			}
 			number++;
 		}
