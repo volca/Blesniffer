@@ -47,7 +47,7 @@ static int parseMac(char *str, uint8_t *output) {
     for (i = 0; i < len / 2; i++) {
         buf[0] = str[i * 2];
         buf[1] = str[i * 2 + 1];
-        output[i] = strtol(buf, NULL, 16);
+        output[6 - 1 - i] = strtol(buf, NULL, 16);
     }
     
     return 0;
@@ -60,6 +60,8 @@ int main(int argc, const char *argv[]) {
 		int channelNumber = 0;
 		int deviceNumber = 0;
         uint8_t macFilter[6];
+        memset(macFilter, 0, sizeof(macFilter));
+        uint8_t hasFilter = 0;
         
 		{
 			int optch, ret;
@@ -98,6 +100,7 @@ int main(int argc, const char *argv[]) {
                             macFilter[4],
                             macFilter[5]
                         );
+                        hasFilter = 1;
                         break;
 					default:
 						exit(1);
@@ -169,7 +172,7 @@ int main(int argc, const char *argv[]) {
 		verbose("start to capture.\n");
 		signal(SIGINT, signalHandler);
 		NSUInteger number = 0;
-        
+
         while (ReadingRecord) {
 			@autoreleasepool {
 				CC2540Record *record = [cc2540 read];
@@ -183,16 +186,21 @@ int main(int argc, const char *argv[]) {
 				}
 				if ([record isKindOfClass:[CC2540CapturedRecord class]]) {
 					CC2540CapturedRecord *capturedRecord = (CC2540CapturedRecord *)record;
-                    /*
-					verbose("%c", (capturedRecord.packetPduType > 0) ?
-						((char)(capturedRecord.packetPduType) + '0') : '?');
-                     */
+					//verbose("%c", (capturedRecord.packetPduType > 0) ?
+					//	((char)(capturedRecord.packetPduType) + '0') : '?');
 					//[file write:capturedRecord];
-                    fprintf(stdout, capturedRecord.packetChars);
-                    fprintf(stdout, "\n");
+                    
+                    if (hasFilter) {
+                        if (memcmp(macFilter, capturedRecord.mac, 6) != 0) {
+                            continue;
+                        }
+                         
+                    }
+                    
+                    fprintf(stdout, "%s\n", capturedRecord.packetChars);
 				}
                 
-                [cc2540 start:channelNumber];
+                //[cc2540 start:channelNumber];
 
 			}
 			number++;

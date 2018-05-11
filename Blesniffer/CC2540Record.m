@@ -109,10 +109,8 @@ static inline char itoh(int i) {
 	packetTimestamp.tv_usec = (header->timestamp % nanoSeconds) / nanoToMicro;
 	
 	uint32 packetLength = (uint32)((size_t)length - MinimumLength);
-    /*
-	void *packetBytes = malloc(packetLength);
+	uint8_t *packetBytes = malloc(packetLength);
 	memcpy(packetBytes, header->packet, packetLength);
-    */
     
     uint32 i;
     unsigned char *b;
@@ -134,15 +132,19 @@ static inline char itoh(int i) {
 	if (packetLength > 5) {
 		packetPduType = ((uint8 *)header->packet)[5] >> 4;
 	}
+    
+    uint8_t mac[6];
+    memcpy(mac, packetBytes + 6, 6);
 	
 	self.packetTimestamp = packetTimestamp;
 	self.packetLength = packetLength;
-    //self.packetBytes = packetBytes;
+    self.packetBytes = packetBytes;
     self.packetChars = packetChars;
 	self.packetRssi = packetRssi;
 	self.packetChannel = packetChannel;
 	self.packetStatus = packetStatus;
 	self.packetPduType = packetPduType;
+    self.mac = &mac[0];
 }
 
 @end
