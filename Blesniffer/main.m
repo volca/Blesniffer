@@ -172,9 +172,18 @@ int main(int argc, const char *argv[]) {
 		verbose("start to capture.\n");
 		signal(SIGINT, signalHandler);
 		NSUInteger number = 0;
+        NSTimeInterval currentTime, diff, prevTime = [[NSDate date] timeIntervalSince1970];
 
         while (ReadingRecord) {
 			@autoreleasepool {
+                currentTime = [[NSDate date] timeIntervalSince1970];
+                diff = currentTime - prevTime;
+                if (diff > 1.5) {
+                    [cc2540 stop];
+                    [cc2540 start:channelNumber];
+                }
+                
+                prevTime = currentTime;
 				CC2540Record *record = [cc2540 read];
 				if (!record) {
 					if (ReadingRecord) {

@@ -114,7 +114,7 @@ static inline char itoh(int i) {
     
     uint32 i;
     unsigned char *b;
-    unsigned char *packetChars = malloc(packetLength * 2) + 1;
+    char *packetChars = malloc(packetLength * 2) + 1;
     b = header->packet;
     for (i = 0; i < packetLength; i++) {
         packetChars[i * 2] = itoh((b[i] >> 4) & 0xF);
