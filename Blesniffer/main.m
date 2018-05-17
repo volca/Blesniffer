@@ -41,6 +41,7 @@
 #define CLRLINE              "\r\e[K"
 
 #define PACKET_MAX_LEN       120
+#define PACKET_MIN_LEN       16
 
 static volatile const char *ApplicationVersion __attribute__((unused)) = "1.0.1";
 
@@ -241,7 +242,7 @@ int main(int argc, const char *argv[]) {
                          
                     }
                     
-                    if (data.packetLength > PACKET_MAX_LEN) {
+                    if ((data.packetLength > PACKET_MAX_LEN) || (data.packetLength < PACKET_MIN_LEN)) {
                         continue;
                     }
                     
