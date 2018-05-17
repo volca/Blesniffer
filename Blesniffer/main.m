@@ -14,6 +14,32 @@
 #import "CC2540Record.h"
 #import "PcapDumpFile.h"
 
+#define NONE                 "\e[0m"
+#define BLACK                "\e[0;30m"
+#define L_BLACK              "\e[1;30m"
+#define RED                  "\e[0;31m"
+#define L_RED                "\e[1;31m"
+#define GREEN                "\e[0;32m"
+#define L_GREEN              "\e[1;32m"
+#define BROWN                "\e[0;33m"
+#define YELLOW               "\e[1;33m"
+#define BLUE                 "\e[0;34m"
+#define L_BLUE               "\e[1;34m"
+#define PURPLE               "\e[0;35m"
+#define L_PURPLE             "\e[1;35m"
+#define CYAN                 "\e[0;36m"
+#define L_CYAN               "\e[1;36m"
+#define GRAY                 "\e[0;37m"
+#define WHITE                "\e[1;37m"
+
+#define BOLD                 "\e[1m"
+#define UNDERLINE            "\e[4m"
+#define BLINK                "\e[5m"
+#define REVERSE              "\e[7m"
+#define HIDE                 "\e[8m"
+#define CLEAR                "\e[2J"
+#define CLRLINE              "\r\e[K"
+
 static volatile const char *ApplicationVersion __attribute__((unused)) = "1.0.1";
 
 static volatile BOOL VerboseMode = NO;
@@ -51,6 +77,13 @@ static int parseMac(char *str, uint8_t *output) {
     }
     
     return 0;
+}
+
+static void hexPrint(uint8_t *data, int len) {
+    uint32 i;
+    for (i = 0; i < len; i++) {
+        fprintf(stdout, "%02X ", data[i]);
+    }
 }
 
 int main(int argc, const char *argv[]) {
@@ -194,22 +227,29 @@ int main(int argc, const char *argv[]) {
 					break;
 				}
 				if ([record isKindOfClass:[CC2540CapturedRecord class]]) {
-					CC2540CapturedRecord *capturedRecord = (CC2540CapturedRecord *)record;
+					CC2540CapturedRecord *data = (CC2540CapturedRecord *)record;
 					//verbose("%c", (capturedRecord.packetPduType > 0) ?
 					//	((char)(capturedRecord.packetPduType) + '0') : '?');
 					//[file write:capturedRecord];
                     
                     if (hasFilter) {
-                        if (memcmp(macFilter, capturedRecord.mac, 6) != 0) {
+                        if (memcmp(macFilter, data.mac, 6) != 0) {
                             continue;
                         }
                          
                     }
                     
-                    fprintf(stdout, "%s\n", capturedRecord.packetChars);
+                    fprintf(
+                        stdout,
+                        GRAY "%d " BLUE "%d " YELLOW "%02X%02X%02X%02X%02X%02X " NONE,
+                            
+                        data.packetChannel,
+                        data.packetPduType,
+                        data.mac[5],data.mac[4],data.mac[3],data.mac[2],data.mac[1],data.mac[0]
+                    );
+                    hexPrint(data.packetBytes + 12, data.packetLength - 12 - 3);
+                    fprintf(stdout, L_RED "%d\n" NONE, data.packetRssi);
 				}
-                
-                //[cc2540 start:channelNumber];
 
 			}
 			number++;

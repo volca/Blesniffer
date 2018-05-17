@@ -48,7 +48,7 @@ struct CC2540CapturedRecordHeader {
 } __attribute__((packed));
 
 struct CC2540CapturedRecordFooter {
-	uint8 rssi;			// it contains RSSI ?
+	int8_t rssi;			// it contains RSSI ?
 	uint8 flags;			// it contains that this frame is valid or invalid ?
 } __attribute__((packed));
 
@@ -92,11 +92,6 @@ const size_t MinimumLength = HeaderLength + FooterLength;
 	return YES;
 }
 
-static inline char itoh(int i) {
-    if (i > 9) return 'A' + (i - 10);
-    return '0' + i;
-}
-
 - (void)parseBytes:(uint8 *)bytes length:(NSInteger)length {
 	struct CC2540CapturedRecordHeader *header = (struct CC2540CapturedRecordHeader *)bytes;
 	
@@ -112,19 +107,8 @@ static inline char itoh(int i) {
 	uint8_t *packetBytes = malloc(packetLength);
 	memcpy(packetBytes, header->packet, packetLength);
     
-    uint32 i;
-    unsigned char *b;
-    char *packetChars = malloc(packetLength * 2) + 1;
-    b = header->packet;
-    for (i = 0; i < packetLength; i++) {
-        packetChars[i * 2] = itoh((b[i] >> 4) & 0xF);
-        packetChars[i*2+1] = itoh(b[i] & 0xF);
-    }
-    packetLength *= 2;
-    packetChars[packetLength] = '\0';
-
 	struct CC2540CapturedRecordFooter *footer = (struct CC2540CapturedRecordFooter *)(bytes + length - FooterLength);
-	int packetRssi = (char)footer->rssi;
+	int8_t packetRssi = footer->rssi - 80;
 	int packetChannel = footer->flags & 0x7f;
 	int packetStatus = (footer->flags & 0x80 ? 1 : 0);
 	
@@ -139,7 +123,6 @@ static inline char itoh(int i) {
 	self.packetTimestamp = packetTimestamp;
 	self.packetLength = packetLength;
     self.packetBytes = packetBytes;
-    self.packetChars = packetChars;
 	self.packetRssi = packetRssi;
 	self.packetChannel = packetChannel;
 	self.packetStatus = packetStatus;
