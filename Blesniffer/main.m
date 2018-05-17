@@ -40,6 +40,8 @@
 #define CLEAR                "\e[2J"
 #define CLRLINE              "\r\e[K"
 
+#define PACKET_MAX_LEN       120
+
 static volatile const char *ApplicationVersion __attribute__((unused)) = "1.0.1";
 
 static volatile BOOL VerboseMode = NO;
@@ -237,6 +239,10 @@ int main(int argc, const char *argv[]) {
                             continue;
                         }
                          
+                    }
+                    
+                    if (data.packetLength > PACKET_MAX_LEN) {
+                        continue;
                     }
                     
                     fprintf(
