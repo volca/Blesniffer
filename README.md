@@ -11,8 +11,10 @@ This application captures Bluetooth LE packet in air and saves them to a file.
 This is a command line utility.
 
 ```
-$ Blesniffer [-c channel#] [-d device#] [-v] output.pcap
+$ Blesniffer [-c channel#] [-d device#] [-v] [-m mac#] -
 ```
+
+Pprint to stdout only.
 
 Press Control + C to stop capturing packets.
 
@@ -21,7 +23,7 @@ Press Control + C to stop capturing packets.
   * `-c channel#`: RF channel. The channel must be from 0 to 39. One of 37, 38 or 39 is recommended. This is option parameter. The default channel is 37.
   * `-d device#`: An index of device in list. This is option parameter. Th default index is 0.
   * `-v`: Enter verbose mode. This is option parameter. The default is no-verbose mode.
-  * `output.pcap`: A name of output file which format is PCAP. If you specified '-', the program outputs captured packets to standard out.
+  * `-m mac#`: An filter for the mac adress of BLE device. eg. FFDDAA112233
 
 The content of `output.pcap` can be seen per packet using [Wireshark](https://www.wireshark.org/).
 
@@ -35,9 +37,3 @@ The content of `output.pcap` can be seen per packet using [Wireshark](https://ww
 
 Please read [this file](LICENSE).
 
-## Work With Wireshark
-
-```
-./Blesniffer -d 0 ~/Downloads/output.pcap
-tail -f -c +0 ~/Downloads/output.pcap |wireshark -k -i -
-```
