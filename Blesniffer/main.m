@@ -43,6 +43,8 @@
 #define PACKET_MAX_LEN       120
 #define PACKET_MIN_LEN       16
 
+#define BD_ADDR_LEN          6
+
 static volatile const char *ApplicationVersion __attribute__((unused)) = "1.0.1";
 
 static volatile BOOL VerboseMode = NO;
@@ -64,15 +66,37 @@ static void signalHandler(int signal) {
 	ReadingRecord = NO;
 }
 
+static void hexPrint(uint8_t *data, int len) {
+    uint32 i;
+    for (i = 0; i < len; i++) {
+        fprintf(stdout, "%02X ", data[i]);
+    }
+}
+
+static bool isAddrMatch(uint8_t *a1, uint8_t *a2, uint8_t count) {
+    while (count-- > 0) {
+        if (*a2 == 0) {
+            a2++;
+            continue;
+        }
+
+        if (a1[count] != *a2++) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static int parseMac(char *str, uint8_t *output) {
     int i;
     size_t len = strlen(str);
     char buf[3] = {'\0','\0','\0'};
 
-    if (12 != len) {
+    if (0 != len % 2) {
         return -1;
     }
     
+    memset(output, 0, BD_ADDR_LEN);
     for (i = 0; i < len / 2; i++) {
         buf[0] = str[i * 2];
         buf[1] = str[i * 2 + 1];
@@ -80,13 +104,6 @@ static int parseMac(char *str, uint8_t *output) {
     }
     
     return 0;
-}
-
-static void hexPrint(uint8_t *data, int len) {
-    uint32 i;
-    for (i = 0; i < len; i++) {
-        fprintf(stdout, "%02X ", data[i]);
-    }
 }
 
 int main(int argc, const char *argv[]) {
@@ -231,15 +248,11 @@ int main(int argc, const char *argv[]) {
 				}
 				if ([record isKindOfClass:[CC2540CapturedRecord class]]) {
 					CC2540CapturedRecord *data = (CC2540CapturedRecord *)record;
-					//verbose("%c", (capturedRecord.packetPduType > 0) ?
-					//	((char)(capturedRecord.packetPduType) + '0') : '?');
-					//[file write:capturedRecord];
                     
                     if (hasFilter) {
-                        if (memcmp(macFilter, data.mac, 6) != 0) {
+                        if (!isAddrMatch(data.mac, macFilter, BD_ADDR_LEN)) {
                             continue;
                         }
-                         
                     }
                     
                     if ((data.packetLength > PACKET_MAX_LEN) || (data.packetLength < PACKET_MIN_LEN)) {
@@ -249,7 +262,6 @@ int main(int argc, const char *argv[]) {
                     fprintf(
                         stdout,
                         GRAY "%d " BLUE "%d " YELLOW "%02X%02X%02X%02X%02X%02X " NONE,
-                            
                         data.packetChannel,
                         data.packetPduType,
                         data.mac[5],data.mac[4],data.mac[3],data.mac[2],data.mac[1],data.mac[0]
@@ -267,7 +279,6 @@ int main(int argc, const char *argv[]) {
 		[file close];
 		[cc2540 close];
 		[manager close];
-		
 	}
 	
     exit(0);

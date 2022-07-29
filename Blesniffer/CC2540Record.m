@@ -108,7 +108,8 @@ const size_t MinimumLength = HeaderLength + FooterLength;
 	memcpy(packetBytes, header->packet, packetLength);
     
 	struct CC2540CapturedRecordFooter *footer = (struct CC2540CapturedRecordFooter *)(bytes + length - FooterLength);
-	int8_t packetRssi = footer->rssi - 80;
+	//int8_t packetRssi = (footer->rssi + 128) % 256 - 128 - 73;
+	int8_t packetRssi = footer->rssi;
 	int packetChannel = footer->flags & 0x7f;
 	int packetStatus = (footer->flags & 0x80 ? 1 : 0);
 	
