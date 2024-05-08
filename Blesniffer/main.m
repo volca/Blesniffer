@@ -97,10 +97,11 @@ static int parseMac(char *str, uint8_t *output) {
     }
     
     memset(output, 0, BD_ADDR_LEN);
-    for (i = 0; i < len / 2; i++) {
+    int hex_len = (int)len / 2;
+    for (i = hex_len - 1; i >= 0; i--) {
         buf[0] = str[i * 2];
         buf[1] = str[i * 2 + 1];
-        output[6 - 1 - i] = strtol(buf, NULL, 16);
+        output[BD_ADDR_LEN - hex_len + i] = strtol(buf, NULL, 16);
     }
     
     return 0;
