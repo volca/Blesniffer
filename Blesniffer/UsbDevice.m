@@ -115,9 +115,23 @@
 	return YES;
 }
 
-- (NSInteger)numberOfConfigurations {
+- (BOOL)deviceRequest:(IOUSBDevRequest *)request {
 	if (!self.deviceInterface) {
 		return NO;
+	}
+
+	IOUSBDeviceInterface245 **deviceInterface = self.deviceInterface;
+	IOReturn result = (*deviceInterface)->DeviceRequest(deviceInterface, request);
+	if (result != KERN_SUCCESS) {
+		return NO;
+	}
+
+	return YES;
+}
+
+- (NSInteger)numberOfConfigurations {
+	if (!self.deviceInterface) {
+		return -1;
 	}
 	IOUSBDeviceInterface245 **deviceInterface = self.deviceInterface;
 	IOReturn result;
@@ -140,15 +154,15 @@
 - (NSInteger)getConfiguration {
 	NSInteger configurations = [self numberOfConfigurations];
 	if (configurations < 1) {
-		return NO;
+		return -1;
 	}
 
 	UInt8 configuration = 0;
-	
+
 	IOUSBDeviceInterface245 **deviceInterface = self.deviceInterface;
 	IOReturn result = (*deviceInterface)->GetConfiguration(deviceInterface, &configuration);
 	if (result != KERN_SUCCESS) {
-		return NO;
+		return -1;
 	}
 
 	return (NSInteger)configuration;

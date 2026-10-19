@@ -47,7 +47,7 @@
 		return YES;
 	}
 	
-	kern_return_t result = IOMasterPort(MACH_PORT_NULL, &_masterPort);
+	kern_return_t result = IOMainPort(MACH_PORT_NULL, &_masterPort);
 	if (result != KERN_SUCCESS) {
 		return NO;
 	}

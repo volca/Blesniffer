@@ -59,12 +59,15 @@
 	}
 	
 	NSInteger configuration = [self.device getConfiguration];
-	if (configuration < 0) {
-		return NO;
+	if (configuration == 0) {
+		// Not configured: select the first configuration.
+		if (![self.device setConfiguration:1]) {
+			return NO;
+		}
 	}
-	if (![self.device setConfiguration:configuration]) {
-		return NO;
-	}
+	// configuration > 0: already configured, re-issuing SET_CONFIGURATION is
+	// unnecessary and stalls on some CC2540 firmwares.
+	// configuration < 0: the request failed; leave the current configuration alone.
 	NSArray<UsbDeviceInterface *> *interfaceList = [self.device interfaceList];
 	if (interfaceList.count < 1) {
 		return NO;
@@ -224,7 +227,9 @@
 			.pData			= nil,
 			.wLenDone		= 0,
 		};
-		if (![self.control controlRequest:&request]) {
+		// The start request has to be sent through the device user client.
+		// Through the interface user client it is acknowledged but capture never starts.
+		if (![self.device deviceRequest:&request]) {
 			return NO;
 		}
 	}

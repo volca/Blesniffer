@@ -104,7 +104,7 @@
 	UInt8 pipes = 0;
 	IOReturn result = (*interfaceInterface)->GetNumEndpoints(interfaceInterface, &pipes);
 	if (result != KERN_SUCCESS) {
-		return NO;
+		return nil;
 	}
 	
 	NSMutableArray<UsbDevicePipe *> *pipeList = [NSMutableArray array];

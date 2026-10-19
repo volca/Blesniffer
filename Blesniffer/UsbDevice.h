@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <IOKit/usb/IOUSBLib.h>
 
 @class UsbDeviceInterface;
 
@@ -18,6 +19,7 @@
 
 - (BOOL)open;
 - (BOOL)close;
+- (BOOL)deviceRequest:(IOUSBDevRequest *)request;
 - (NSInteger)getConfiguration;
 - (BOOL)setConfiguration:(NSInteger)value;
 - (NSArray<UsbDeviceInterface *> *)interfaceList;
